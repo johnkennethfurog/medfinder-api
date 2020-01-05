@@ -3,7 +3,7 @@ var ObjectId = require("mongodb").ObjectID;
 
 const express = require("express");
 const router = express.Router();
-
+//const config = require(path.resolve("config.js"));
 const config = require("../config.js");
 
 router.post("/store/nearest", function (req, res) {
@@ -42,7 +42,7 @@ router.post("/store/medicine/", function (req, res) {
             }
 
             const objectIds = req.body.map(x => ObjectId(x));
-            console.log('ObjectId', objectIds);
+            console.log('config', config.mongoUrl);
 
             const db = client.db("MedFind").collection("Store");
             db.aggregate([
