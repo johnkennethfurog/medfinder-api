@@ -6,31 +6,31 @@ const router = express.Router();
 //const config = require(path.resolve("config.js"));
 const config = require("../config.js");
 
-router.post("/store/nearest", function (req, res) {
-    MongoClient.connect(
-        config.mongoUrl,
-        { useNewUrlParser: true, useUnifiedTopology: true },
-        function (err, client) {
-            if (err) {
-                res.send(err);
-            }
+// router.post("/store/nearest", function (req, res) {
+//     MongoClient.connect(
+//         config.mongoUrl,
+//         { useNewUrlParser: true, useUnifiedTopology: true },
+//         function (err, client) {
+//             if (err) {
+//                 res.send(err);
+//             }
 
-            console.log(req.body);
+//             console.log(req.body);
 
-            const db = client.db("MedFind").collection("Store");
-            db.aggregate([{ $geoNear: { near: { type: "Point", coordinates: [121.122218, 14.303993] }, distanceField: "distance", spherical: true, "distanceMultiplier": 0.001 } }]).toArray(function (err, results) {
-                if (err) {
-                    res.send(err);
-                }
-                if (results.length > 0) {
-                    res.json({ statusCode: 200, message: "", data: results })
-                } else {
-                    res.json({ statusCode: 401, message: "No available medicine" });
-                }
-            });
-        }
-    );
-});
+//             const db = client.db("MedFind").collection("Store");
+//             db.aggregate([{ $geoNear: { near: { type: "Point", coordinates: [121.122218, 14.303993] }, distanceField: "distance", spherical: true, "distanceMultiplier": 0.001 } }]).toArray(function (err, results) {
+//                 if (err) {
+//                     res.send(err);
+//                 }
+//                 if (results.length > 0) {
+//                     res.json({ statusCode: 200, message: "", data: results })
+//                 } else {
+//                     res.json({ statusCode: 401, message: "No available medicine" });
+//                 }
+//             });
+//         }
+//     );
+// });
 
 router.post("/store/medicine/", function (req, res) {
     MongoClient.connect(
@@ -42,7 +42,7 @@ router.post("/store/medicine/", function (req, res) {
             }
 
             const objectIds = req.body.map(x => ObjectId(x));
-            console.log('config', config.mongoUrl);
+            // console.log('config', config.mongoUrl);
 
             const db = client.db("MedFind").collection("Store");
             db.aggregate([
