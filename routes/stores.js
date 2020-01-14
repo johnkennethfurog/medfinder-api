@@ -41,7 +41,7 @@ router.post("/store/medicine/", function (req, res) {
                 res.send(err);
             }
 
-            const objectIds = req.body.map(x => ObjectId(x));
+            const objectIds = req.body.medicinesId.map(x => ObjectId(x));
             // console.log('config', config.mongoUrl);
 
             const db = client.db("MedFind").collection("Store");
@@ -49,7 +49,7 @@ router.post("/store/medicine/", function (req, res) {
                 {
                     // calculate the distace from users location
                     $geoNear: {
-                        near: { type: "Point", coordinates: [121.122218, 14.303993] },
+                        near: { type: "Point", coordinates: req.body.location },
                         distanceField: "distance",
                         spherical: true,
                         "distanceMultiplier": 0.001,
