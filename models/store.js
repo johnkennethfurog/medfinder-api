@@ -11,25 +11,23 @@ const storeSchema = mongoose.Schema(
     },
     Admin: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     Schedule: {
-      mon: { from: String, to: String },
-      tue: { from: String, to: String },
-      wed: { from: String, to: String },
-      thu: { from: String, to: String },
-      fri: { from: String, to: String },
-      sat: { from: String, to: String },
-      sun: { from: String, to: String }
+      mon: { From: String, To: String },
+      tue: { From: String, To: String },
+      wed: { From: String, To: String },
+      thu: { From: String, To: String },
+      fri: { From: String, To: String },
+      sat: { From: String, To: String },
+      sun: { From: String, To: String }
     },
     Medicines: [
       {
-        MedicineId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Medicine"
-        },
-        MinSrp: Number,
-        MaxSrp: Number,
+        MedicineId: mongoose.Schema.Types.ObjectId,
+        Srp: Number,
+        Margin: Number,
         Qty: Number
       }
-    ]
+    ],
+    ContactInfo: String
   },
   { collection: "Store" }
 );

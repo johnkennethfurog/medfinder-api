@@ -19,3 +19,13 @@ exports.search_medicine = (req, res) => {
       res.json({ statusCode: 500, message: error });
     });
 };
+
+exports.get_all = (req, res) => {
+  Medicine.find({})
+    .then(docs => {
+      res.json({ statusCode: 200, message: "", data: docs });
+    })
+    .catch(error => {
+      res.json({ statusCode: 500, message: error });
+    });
+};
