@@ -27,7 +27,8 @@ const storeSchema = mongoose.Schema(
         Qty: Number
       }
     ],
-    ContactInfo: String
+    ContactInfo: String,
+    Avatar: { url: String, public_id: String }
   },
   { collection: "Store" }
 );

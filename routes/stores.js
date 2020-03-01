@@ -17,4 +17,12 @@ router.delete("/medicine/:storeId/:medicineId", store.delete_medicine);
 
 router.put("/medicine", store.update_medicine);
 
+router.post("/avatar", store.upload_avatar);
+
+router.post("/add", store.register_store);
+
+router.put("/resetpassword", store.reset_store_password);
+
+router.get("/", store.get_stores);
+
 module.exports = router;

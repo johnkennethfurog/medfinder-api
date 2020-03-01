@@ -29,3 +29,103 @@ exports.get_all = (req, res) => {
       res.json({ statusCode: 500, message: error });
     });
 };
+
+exports.add_medicine = (req, res) => {
+  const { GenericName, BrandName, Size, UoM, NeedPresription } = req.body;
+
+  // GenericName: String,
+  // BrandName: String,
+  // Size: Number,
+  // : String,
+  // NeedPresription: Boolean
+
+  const medicine = new Medicine();
+  medicine.GenericName = GenericName;
+  medicine.BrandName = BrandName;
+  medicine.Size = Size;
+  medicine.UoM = UoM;
+  medicine.NeedPresription = NeedPresription;
+
+  try {
+    medicine
+      .save()
+      .then(doc => {
+        res.status(200).json({
+          data: doc
+        });
+      })
+      .catch(error => {
+        res.status(400).json({
+          message: "Something went wrong while adding medicine.",
+          data: error
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong while adding medicine."
+    });
+  }
+};
+
+exports.update_medicine = (req, res) => {
+  const { GenericName, BrandName, Size, UoM, NeedPresription, _id } = req.body;
+  try {
+    Medicine.findOneAndUpdate(
+      {
+        _id
+      },
+      {
+        $set: {
+          GenericName,
+          BrandName,
+          Size,
+          UoM,
+          NeedPresription
+        }
+      },
+      {
+        new: true
+      }
+    )
+      .then(doc => {
+        res.status(200).json({
+          data: doc
+        });
+      })
+      .catch(error => {
+        res.status(400).json({
+          message: "Something went wrong while updating medicine.",
+          data: error
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong while updating medicine."
+    });
+  }
+};
+
+exports.delete_medicine = (req, res) => {
+  const _id = req.params.medicineId;
+
+  try {
+    Medicine.findByIdAndRemove({
+      _id
+    })
+      .then(doc => {
+        res.status(200).json({
+          data: doc
+        });
+      })
+      .catch(error => {
+        res.status(400).json({
+          message: "Something went wrong while removing medicine.",
+          data: error
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong while removing medicine."
+    });
+  }
+};

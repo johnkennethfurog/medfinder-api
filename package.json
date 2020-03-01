@@ -10,16 +10,20 @@
     "node": "10.15.3"
   },
   "dependencies": {
+    "cloudinary": "^1.19.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "express-fileupload": "^1.1.6",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "lodash": "^4.17.15",
     "mongodb": "^3.5.3",
     "mongoose": "^5.8.11",
     "morgan": "~1.9.1",
-    "nodemon": "^2.0.2"
+    "nodemailer": "^6.4.3",
+    "nodemon": "^2.0.2",
+    "password-generator": "^2.2.3"
   }
 }

@@ -6,7 +6,8 @@ const medicineSchema = mongoose.Schema(
     BrandName: String,
     Size: Number,
     UoM: String,
-    NeedPresription: Boolean
+    NeedPresription: Boolean,
+    Avatar: String
   },
   { collection: "Medicine" }
 );
