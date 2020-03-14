@@ -6,6 +6,7 @@ const _ = require("lodash");
 const cloudinary = require("cloudinary").v2;
 const generatePassword = require("password-generator");
 const nodemailer = require("nodemailer");
+const medcrypt = require("../utils/medcrypt");
 
 cloudinary.config({
   cloud_name: config.cloudinary_name,
@@ -102,12 +103,15 @@ exports.find_store = (req, res) => {
 };
 
 exports.get_medicines = (req, res) => {
-  const storeId = ObjectId(req.params.storeId);
+  const { storeId } = req.decoded;
+
+  console.log("req.decoded", req.decoded);
+  console.log("storeId", storeId);
 
   Store.aggregate([
     {
       $match: {
-        _id: storeId
+        _id: ObjectId(storeId)
       }
     },
     {
@@ -184,8 +188,8 @@ exports.get_medicines = (req, res) => {
 
 exports.update_medicine = (req, res) => {
   try {
-    console.log(req.body);
-    const { medicine, storeId } = req.body;
+    const { medicine } = req.body;
+    const { storeId } = req.decoded;
 
     Store.findOneAndUpdate(
       {
@@ -225,9 +229,9 @@ exports.update_medicine = (req, res) => {
 
 exports.add_medicines = (req, res) => {
   try {
-    console.log("error", req.body);
+    const { medicines } = req.body;
+    const { storeId } = req.decoded;
 
-    const { medicines, storeId } = req.body;
     Store.findOneAndUpdate(
       { _id: storeId },
       { $push: { Medicines: medicines } },
@@ -263,7 +267,7 @@ exports.add_medicines = (req, res) => {
 exports.delete_medicine = (req, res) => {
   try {
     const medicineId = req.params.medicineId;
-    const storeId = req.params.storeId;
+    const { storeId } = req.decoded;
 
     Store.update(
       {
@@ -302,15 +306,9 @@ exports.delete_medicine = (req, res) => {
 };
 
 exports.update_profile = (req, res) => {
-  const {
-    Name,
-    Location,
-    Schedule,
-    Address,
-    ContactInfo,
-    _id,
-    Avatar
-  } = req.body;
+  const { Name, Location, Schedule, Address, ContactInfo, Avatar } = req.body;
+
+  const { storeId } = req.decoded;
 
   console.log("Schedule", Schedule);
   console.log("req.body", req.body);
@@ -318,7 +316,7 @@ exports.update_profile = (req, res) => {
   try {
     Store.findOneAndUpdate(
       {
-        _id: ObjectId(_id)
+        _id: storeId
       },
       {
         $set: {
@@ -357,9 +355,11 @@ exports.update_profile = (req, res) => {
 };
 
 exports.get_profile = (req, res) => {
+  const { storeId } = req.decoded;
+
   try {
     Store.findOne({
-      _id: req.params.storeId
+      _id: storeId
     })
       .select({ Medicines: 0 })
       .then(docs => {
@@ -405,6 +405,15 @@ exports.upload_avatar = (req, res) => {
 };
 
 exports.get_stores = (req, res) => {
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
+
   Store.find({})
     .select({ Medicines: 0, Schedule: 0, Location: 0 })
     .then(docs => {
@@ -424,15 +433,25 @@ exports.get_stores = (req, res) => {
 
 exports.register_store = (req, res) => {
   const { IsHealthCentre, Address, Name, Email, ContactInfo } = req.body;
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
 
   Password = generatePassword(8, true);
-  const admin = { Email, Password };
+  const { passwordHash, salt } = medcrypt.encrypt(Password);
 
   const user = new User();
   user.Email = Email;
-  user.Password = Password;
+  user.Password = passwordHash;
+  user.Salt = salt;
   user.DefaultAccount = true;
   user.ContactInfo = ContactInfo;
+  user.IsAdminAccount = false;
 
   user
     .save()
@@ -492,17 +511,29 @@ exports.register_store = (req, res) => {
 
 exports.reset_store_password = (req, res) => {
   const { storeId } = req.body;
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
+
   Password = generatePassword(8, true);
+  const { passwordHash, salt } = medcrypt.encrypt(Password);
 
   User.findOneAndUpdate(
     { Store: storeId, DefaultAccount: true },
     {
       $set: {
-        Password
+        Password: passwordHash,
+        Salt: salt
       }
     }
   )
     .then(doc => {
+      console.log("doc", doc);
       if (doc) {
         sendEmail(
           "Your Med-Finder account's password has been reset!",

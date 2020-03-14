@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors");
 const fileupload = require("express-fileupload");
+const dotenv = require("dotenv");
 
 const connectDB = require("./databases/connection");
 
@@ -14,6 +15,8 @@ const storeRouter = require("./routes/stores");
 const medicineRouter = require("./routes/medicines");
 
 const app = express();
+
+dotenv.config();
 
 connectDB();
 
@@ -35,7 +38,7 @@ app.use(
 
 //ROUTES
 app.use("/", indexRouter);
-app.use("/v1", usersRouter);
+app.use("/v1/users", usersRouter);
 app.use("/v1/medicines", medicineRouter);
 app.use("/v1/store", storeRouter);
 

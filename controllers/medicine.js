@@ -1,5 +1,4 @@
 const Medicine = require("../models/medicine");
-var ObjectId = require("mongodb").ObjectID;
 
 exports.search_medicine = (req, res) => {
   Medicine.find({
@@ -21,6 +20,15 @@ exports.search_medicine = (req, res) => {
 };
 
 exports.get_all = (req, res) => {
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
+
   Medicine.find({})
     .then(docs => {
       res.json({ statusCode: 200, message: "", data: docs });
@@ -32,6 +40,14 @@ exports.get_all = (req, res) => {
 
 exports.add_medicine = (req, res) => {
   const { GenericName, BrandName, Size, UoM, NeedPresription } = req.body;
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
 
   // GenericName: String,
   // BrandName: String,
@@ -69,6 +85,15 @@ exports.add_medicine = (req, res) => {
 
 exports.update_medicine = (req, res) => {
   const { GenericName, BrandName, Size, UoM, NeedPresription, _id } = req.body;
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
+
   try {
     Medicine.findOneAndUpdate(
       {
@@ -107,6 +132,14 @@ exports.update_medicine = (req, res) => {
 
 exports.delete_medicine = (req, res) => {
   const _id = req.params.medicineId;
+  const { IsAdminAccount } = req.decoded;
+
+  if (!IsAdminAccount) {
+    this.status(403).json({
+      message: "Invalid token"
+    });
+    return;
+  }
 
   try {
     Medicine.findByIdAndRemove({
