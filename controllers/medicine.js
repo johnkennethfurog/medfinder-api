@@ -20,15 +20,6 @@ exports.search_medicine = (req, res) => {
 };
 
 exports.get_all = (req, res) => {
-  const { IsAdminAccount } = req.decoded;
-
-  if (!IsAdminAccount) {
-    this.status(403).json({
-      message: "Invalid token"
-    });
-    return;
-  }
-
   Medicine.find({})
     .then(docs => {
       res.json({ statusCode: 200, message: "", data: docs });
