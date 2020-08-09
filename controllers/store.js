@@ -7,15 +7,16 @@ const cloudinary = require("cloudinary").v2;
 const generatePassword = require("password-generator");
 const nodemailer = require("nodemailer");
 const medcrypt = require("../utils/medcrypt");
+const { sendEmail } = require("./util");
 
 cloudinary.config({
   cloud_name: config.cloudinary_name,
   api_key: config.cloudinary_key,
-  api_secret: config.cloudinary_secret
+  api_secret: config.cloudinary_secret,
 });
 
 exports.find_store = (req, res) => {
-  const medicineIds = req.body.medicinesId.map(x => ObjectId(x));
+  const medicineIds = req.body.medicinesId.map((x) => ObjectId(x));
   Store.aggregate([
     {
       // calculate the distace from users location
@@ -25,8 +26,8 @@ exports.find_store = (req, res) => {
         spherical: true,
         distanceMultiplier: 0.001,
         // fliter to include only store that contains medicine that we are searchig
-        query: { "Medicines.MedicineId": { $in: medicineIds } }
-      }
+        query: { "Medicines.MedicineId": { $in: medicineIds } },
+      },
     },
 
     // filters STORE medicine to include only medicine that we are searching
@@ -43,10 +44,10 @@ exports.find_store = (req, res) => {
           $filter: {
             input: "$Medicines",
             as: "medicine",
-            cond: { $in: ["$$medicine.MedicineId", medicineIds] }
-          }
-        }
-      }
+            cond: { $in: ["$$medicine.MedicineId", medicineIds] },
+          },
+        },
+      },
     },
     // Get medicine info from Medicine collection = **left join result
     {
@@ -54,8 +55,8 @@ exports.find_store = (req, res) => {
         from: "Medicine",
         localField: "Medicines.MedicineId",
         foreignField: "_id",
-        as: "medicinesData"
-      }
+        as: "medicinesData",
+      },
     },
     // create new field that will contain merge data from **left join result and filtered store medicine
     {
@@ -74,30 +75,30 @@ exports.find_store = (req, res) => {
                         input: "$medicinesData",
                         as: "medicineData",
                         cond: {
-                          $eq: ["$$medicine.MedicineId", "$$medicineData._id"]
-                        }
-                      }
+                          $eq: ["$$medicine.MedicineId", "$$medicineData._id"],
+                        },
+                      },
                     },
-                    0
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      }
+                    0,
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     // hide **left join result
     {
       $project: {
-        medicinesData: 0
-      }
-    }
+        medicinesData: 0,
+      },
+    },
   ])
-    .then(docs => {
+    .then((docs) => {
       res.json({ data: docs });
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ statusCode: 500, message: err });
     });
 };
@@ -111,21 +112,21 @@ exports.get_medicines = (req, res) => {
   Store.aggregate([
     {
       $match: {
-        _id: ObjectId(storeId)
-      }
+        _id: ObjectId(storeId),
+      },
     },
     {
       $project: {
-        Medicines: 1
-      }
+        Medicines: 1,
+      },
     },
     {
       $lookup: {
         from: "Medicine",
         localField: "Medicines.MedicineId",
         foreignField: "_id",
-        as: "medicinesData"
-      }
+        as: "medicinesData",
+      },
     },
 
     // create new field that will contain merge data from **left join result and filtered store medicine
@@ -145,43 +146,43 @@ exports.get_medicines = (req, res) => {
                         input: "$medicinesData",
                         as: "medicineData",
                         cond: {
-                          $eq: ["$$medicine.MedicineId", "$$medicineData._id"]
-                        }
-                      }
+                          $eq: ["$$medicine.MedicineId", "$$medicineData._id"],
+                        },
+                      },
                     },
-                    0
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      }
+                    0,
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     // hide **left join result
     {
       $project: {
-        medicinesData: 0
-      }
-    }
+        medicinesData: 0,
+      },
+    },
   ])
-    .then(docs => {
+    .then((docs) => {
       const store = docs[0];
       if (store) {
         res.json({
           statusCode: 200,
-          data: store
+          data: store,
         });
       } else {
         res.status(404).json({
-          message: "Store not found"
+          message: "Store not found",
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({
         statusCode: 500,
-        data: err
+        data: err,
       });
     });
 };
@@ -194,27 +195,27 @@ exports.update_medicine = (req, res) => {
     Store.findOneAndUpdate(
       {
         "Medicines.MedicineId": medicine.MedicineId,
-        _id: storeId
+        _id: storeId,
       },
       { $set: { "Medicines.$": medicine } },
       {
         upsert: true,
         new: true,
-        useFindAndModify: false
+        useFindAndModify: false,
       }
     )
-      .then(docs => {
+      .then((docs) => {
         res.json({
           statusCode: 200,
-          data: docs.value
+          data: docs.value,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
         res.json({
           status: 400,
           message: error,
-          data: null
+          data: null,
         });
       });
   } catch (error) {
@@ -222,7 +223,7 @@ exports.update_medicine = (req, res) => {
     res.json({
       status: 400,
       message: error,
-      data: null
+      data: null,
     });
   }
 };
@@ -238,20 +239,20 @@ exports.add_medicines = (req, res) => {
       {
         upsert: true,
         new: true,
-        useFindAndModify: false
+        useFindAndModify: false,
       }
     )
-      .then(docs => {
+      .then((docs) => {
         res.json({
           statusCode: 200,
-          data: docs.value
+          data: docs.value,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         res.json({
           status: 400,
           message: error,
-          data: null
+          data: null,
         });
       });
   } catch (error) {
@@ -259,7 +260,7 @@ exports.add_medicines = (req, res) => {
     res.json({
       status: 400,
       message: error,
-      data: null
+      data: null,
     });
   }
 };
@@ -271,36 +272,36 @@ exports.delete_medicine = (req, res) => {
 
     Store.update(
       {
-        _id: ObjectId(storeId)
+        _id: ObjectId(storeId),
       },
       {
         $pull: {
-          Medicines: { MedicineId: ObjectId(medicineId) }
-        }
+          Medicines: { MedicineId: ObjectId(medicineId) },
+        },
       },
       {
-        multi: true
+        multi: true,
       }
     )
-      .then(docs => {
+      .then((docs) => {
         res.json({
           statusCode: 200,
           data: docs.value,
-          message: "Medicine deleted"
+          message: "Medicine deleted",
         });
       })
-      .catch(error => {
+      .catch((error) => {
         res.json({
           status: 400,
           message: error,
-          data: null
+          data: null,
         });
       });
   } catch (error) {
     res.json({
       status: 400,
       message: error,
-      data: null
+      data: null,
     });
   }
 };
@@ -316,7 +317,7 @@ exports.update_profile = (req, res) => {
   try {
     Store.findOneAndUpdate(
       {
-        _id: storeId
+        _id: storeId,
       },
       {
         $set: {
@@ -325,31 +326,31 @@ exports.update_profile = (req, res) => {
           Schedule,
           Address,
           ContactInfo,
-          Avatar
-        }
+          Avatar,
+        },
       },
       {
-        new: true
+        new: true,
       }
     )
       .select({ Medicines: 0 })
-      .then(docs => {
+      .then((docs) => {
         console.log("docs", docs);
         res.json({
           statusCode: 200,
-          data: docs
+          data: docs,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(400).json({
           statusCode: 400,
-          message: "Something went wrong while getting store profile"
+          message: "Something went wrong while getting store profile",
         });
       });
   } catch (ex) {
     res.status(500).json({
       statusCode: 500,
-      message: "Something went wrong while getting store profile"
+      message: "Something went wrong while getting store profile",
     });
   }
 };
@@ -359,25 +360,25 @@ exports.get_profile = (req, res) => {
 
   try {
     Store.findOne({
-      _id: storeId
+      _id: storeId,
     })
       .select({ Medicines: 0 })
-      .then(docs => {
+      .then((docs) => {
         res.json({
           statusCode: 200,
-          data: docs
+          data: docs,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(400).json({
           statusCode: 400,
-          message: "Something went wrong while getting store profile"
+          message: "Something went wrong while getting store profile",
         });
       });
   } catch (ex) {
     res.status(500).json({
       statusCode: 500,
-      message: "Something went wrong while getting store profile"
+      message: "Something went wrong while getting store profile",
     });
   }
 };
@@ -387,19 +388,19 @@ exports.upload_avatar = (req, res) => {
   const file = req.files.photo;
 
   if (public_id) {
-    cloudinary.uploader.destroy(public_id).catch(error => {});
+    cloudinary.uploader.destroy(public_id).catch((error) => {});
   }
 
   cloudinary.uploader
     .upload(file.tempFilePath)
-    .then(function(uploadedFile) {
+    .then(function (uploadedFile) {
       res.status(200).json({
-        data: { url: uploadedFile.url, public_id: uploadedFile.public_id }
+        data: { url: uploadedFile.url, public_id: uploadedFile.public_id },
       });
     })
-    .catch(function(error) {
+    .catch(function (error) {
       res.status(500).json({
-        message: "Unable to upload photo"
+        message: "Unable to upload photo",
       });
     });
 };
@@ -409,23 +410,23 @@ exports.get_stores = (req, res) => {
 
   if (!IsAdminAccount) {
     this.status(403).json({
-      message: "Invalid token"
+      message: "Invalid token",
     });
     return;
   }
 
   Store.find({})
     .select({ Medicines: 0, Schedule: 0, Location: 0 })
-    .then(docs => {
+    .then((docs) => {
       res
         .status(200)
         .json({
-          data: docs
+          data: docs,
         })
-        .catch(err => {
+        .catch((err) => {
           res.status(400).json({
             message: "Unable to get stores",
-            data: err
+            data: err,
           });
         });
     });
@@ -437,7 +438,7 @@ exports.register_store = (req, res) => {
 
   if (!IsAdminAccount) {
     this.status(403).json({
-      message: "Invalid token"
+      message: "Invalid token",
     });
     return;
   }
@@ -455,7 +456,7 @@ exports.register_store = (req, res) => {
 
   user
     .save()
-    .then(user => {
+    .then((user) => {
       const store = new Store();
       store.IsHealthCentre = IsHealthCentre;
       store.Name = Name;
@@ -463,48 +464,48 @@ exports.register_store = (req, res) => {
       store.Admin = [user._id];
       store
         .save()
-        .then(doc => {
+        .then((doc) => {
           user.Store = doc._id;
           user
             .save()
-            .then(rspns => {
+            .then((rspns) => {
               sendEmail(
                 "Med-Finder account created!",
                 Email,
                 `Your med-finder account password is : ${Password}`
               )
-                .then(rspns => {
+                .then((rspns) => {
                   console.log("rspns", rspns);
                   res.status(200).json({
-                    data: doc
+                    data: doc,
                   });
                 })
-                .catch(err => {
+                .catch((err) => {
                   console.log("err", err);
                   res.status(200).json({
                     data: doc,
-                    message: "email not sent"
+                    message: "email not sent",
                   });
                 });
             })
-            .catch(err => {
+            .catch((err) => {
               res.status(400).json({
                 message: "failed linking user to store",
-                data: err
+                data: err,
               });
             });
         })
-        .catch(err => {
+        .catch((err) => {
           res.status(400).json({
             message: "Unable to create new store.",
-            data: err
+            data: err,
           });
         });
     })
-    .catch(error => {
+    .catch((error) => {
       res.status(400).json({
         message: "Unable to create new user for store.",
-        data: err
+        data: err,
       });
     });
 };
@@ -515,7 +516,7 @@ exports.reset_store_password = (req, res) => {
 
   if (!IsAdminAccount) {
     this.status(403).json({
-      message: "Invalid token"
+      message: "Invalid token",
     });
     return;
   }
@@ -528,11 +529,11 @@ exports.reset_store_password = (req, res) => {
     {
       $set: {
         Password: passwordHash,
-        Salt: salt
-      }
+        Salt: salt,
+      },
     }
   )
-    .then(doc => {
+    .then((doc) => {
       console.log("doc", doc);
       if (doc) {
         sendEmail(
@@ -540,47 +541,28 @@ exports.reset_store_password = (req, res) => {
           doc.Email,
           `Your new med-finder account password is : ${Password}`
         )
-          .then(rspns => {
+          .then((rspns) => {
             res.status(200).json({
-              message: "Success"
+              message: "Success",
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log("err", err);
             res.status(200).json({
               data: doc,
-              message: "email not sent"
+              message: "email not sent",
             });
           });
       } else {
         res.status(404).json({
-          message: "Store not found."
+          message: "Store not found.",
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(400).json({
         message: "Unable to retrieve default account for store",
-        data: err
+        data: err,
       });
     });
-};
-
-sendEmail = (subject, email, message) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "medfinder.noreply@gmail.com",
-      pass: "Kenneth18!"
-    }
-  });
-
-  const mailOptions = {
-    from: "medfinder.noreply@gmail.com", // sender address
-    to: email, // list of receivers
-    subject, // Subject line
-    html: message // plain text body
-  };
-
-  return transporter.sendMail(mailOptions);
 };
