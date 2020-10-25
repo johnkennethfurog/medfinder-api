@@ -77,6 +77,7 @@ exports.signin = (req, res) => {
             userId: doc._id,
             storeId: doc.Store,
             IsAdminAccount: doc.IsAdminAccount,
+            IsHealthCentre: doc.IsHealthCentre,
           };
 
           doc.Password = undefined;
