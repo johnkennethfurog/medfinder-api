@@ -68,6 +68,7 @@ exports.signin = (req, res) => {
       Store: 1,
       IsHealthCentre: 1,
     })
+    .populate("Store")
     .then((doc) => {
       if (doc) {
         const { Password, Salt } = doc;
@@ -75,13 +76,13 @@ exports.signin = (req, res) => {
         if (isSame) {
           const payload = {
             userId: doc._id,
-            storeId: doc.Store,
+            storeId: doc.Store._id,
             IsAdminAccount: doc.IsAdminAccount,
-            IsHealthCentre: doc.IsHealthCentre,
           };
 
           doc.Password = undefined;
           doc.Salt = undefined;
+          doc.IsHealthCentre = doc.Store.IsHealthCentre;
           doc.Store = undefined;
 
           const authToken = jwt.sign(payload, process.env.JWT_KEY);
