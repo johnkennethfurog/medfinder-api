@@ -66,7 +66,6 @@ exports.signin = (req, res) => {
       Password: 1,
       Salt: 1,
       Store: 1,
-      IsHealthCentre: 1,
     })
     .populate("Store")
     .then((doc) => {
@@ -80,16 +79,17 @@ exports.signin = (req, res) => {
             IsAdminAccount: doc.IsAdminAccount,
           };
 
-          doc.Password = undefined;
-          doc.Salt = undefined;
-          doc.IsHealthCentre = doc.Store.IsHealthCentre;
-          doc.Store = undefined;
-
           const authToken = jwt.sign(payload, process.env.JWT_KEY);
+
+          const user = {
+            Email: doc.Email,
+            IsAdminAccount: doc.IsAdminAccount,
+            IsHealthCentre: doc.Store.IsHealthCentre,
+          };
 
           res.status(200).json({
             message: "Login success",
-            data: { user: doc, authToken },
+            data: { user, authToken },
           });
         } else {
           res.status(400).json({
@@ -98,7 +98,7 @@ exports.signin = (req, res) => {
         }
       } else {
         res.status(400).json({
-          message: "User does not exist",
+          message: "Invalid username or password.",
         });
       }
     })
