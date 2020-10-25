@@ -60,7 +60,14 @@ exports.signin = (req, res) => {
   User.findOne({
     Email: email,
   })
-    .select({ Email: 1, IsAdminAccount: 1, Password: 1, Salt: 1, Store: 1 })
+    .select({
+      Email: 1,
+      IsAdminAccount: 1,
+      Password: 1,
+      Salt: 1,
+      Store: 1,
+      IsHealthCentre: 1,
+    })
     .then((doc) => {
       if (doc) {
         const { Password, Salt } = doc;
