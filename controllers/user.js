@@ -70,12 +70,13 @@ exports.signin = (req, res) => {
     .populate("Store")
     .then((doc) => {
       if (doc) {
-        const { Password, Salt } = doc;
+        const { Password, Salt, Store } = doc;
         const isSame = medcrypt.compare(pass, Password, Salt);
         if (isSame) {
+          const storeId = !Store ? doc.Store._id : null;
           const payload = {
             userId: doc._id,
-            storeId: doc.Store?._id,
+            storeId,
             IsAdminAccount: doc.IsAdminAccount,
           };
 
