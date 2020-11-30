@@ -75,7 +75,7 @@ exports.signin = (req, res) => {
         if (isSame) {
           const payload = {
             userId: doc._id,
-            storeId: doc.Store._id,
+            storeId: doc.Store?._id,
             IsAdminAccount: doc.IsAdminAccount,
           };
 
