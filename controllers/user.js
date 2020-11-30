@@ -74,6 +74,7 @@ exports.signin = (req, res) => {
         const isSame = medcrypt.compare(pass, Password, Salt);
         if (isSame) {
           const storeId = !!Store ? doc.Store._id : null;
+          const IsHealthCentre = !!Store ? doc.Store.IsHealthCentre : false;
           const payload = {
             userId: doc._id,
             storeId,
@@ -85,7 +86,7 @@ exports.signin = (req, res) => {
           const user = {
             Email: doc.Email,
             IsAdminAccount: doc.IsAdminAccount,
-            IsHealthCentre: doc.Store.IsHealthCentre,
+            IsHealthCentre,
           };
 
           res.status(200).json({
