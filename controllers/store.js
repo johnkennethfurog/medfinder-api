@@ -444,6 +444,7 @@ exports.register_store = (req, res) => {
   }
 
   Password = generatePassword(8, true);
+  console.log("store password", Password);
   const { passwordHash, salt } = medcrypt.encrypt(Password);
 
   const user = new User();
