@@ -522,6 +522,7 @@ exports.reset_store_password = (req, res) => {
   }
 
   Password = generatePassword(8, true);
+  console.log("store password", Password);
   const { passwordHash, salt } = medcrypt.encrypt(Password);
 
   User.findOneAndUpdate(
