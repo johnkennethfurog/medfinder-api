@@ -73,7 +73,7 @@ exports.signin = (req, res) => {
         const { Password, Salt, Store } = doc;
         const isSame = medcrypt.compare(pass, Password, Salt);
         if (isSame) {
-          const storeId = !Store ? doc.Store._id : null;
+          const storeId = !!Store ? doc.Store._id : null;
           const payload = {
             userId: doc._id,
             storeId,
